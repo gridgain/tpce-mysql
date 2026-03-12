@@ -36,8 +36,21 @@ CDBConnection::CDBConnection(const char *szHost, const char *szDBName,
     rc = SQLConnect_DIRECT(m_Conn, (SQLCHAR *)szHost, SQL_NTS, (SQLCHAR *)szDBName, SQL_NTS,
 			   (SQLCHAR *)szDBUser, SQL_NTS, (SQLCHAR *)szDBPass, SQL_NTS);
 #else
-    rc = SQLConnect(m_Conn, (SQLCHAR *)szDBName, SQL_NTS,
-		    (SQLCHAR *)szDBUser, SQL_NTS, (SQLCHAR *)szDBPass, SQL_NTS);
+    {
+	// Use SQLDriverConnect to pass DSN parameters (like Address) to the driver.
+	// SQLConnect only passes DSN name/user/password and some drivers need
+	// additional parameters from odbc.ini to establish connections.
+	char connStr[1024];
+	SQLCHAR outStr[1024];
+	SQLSMALLINT outStrLen;
+	if (szDBUser && szDBUser[0]) {
+	    snprintf(connStr, sizeof(connStr), "DSN=%s;UID=%s;PWD=%s", szDBName, szDBUser, szDBPass ? szDBPass : "");
+	} else {
+	    snprintf(connStr, sizeof(connStr), "DSN=%s", szDBName);
+	}
+	rc = SQLDriverConnect(m_Conn, NULL, (SQLCHAR *)connStr, SQL_NTS,
+			      outStr, sizeof(outStr), &outStrLen, SQL_DRIVER_NOPROMPT);
+    }
 #endif
     if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
 	ThrowError(CODBCERR::eConnect);
