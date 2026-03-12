@@ -38,13 +38,19 @@ CDBConnection::CDBConnection(const char *szHost, const char *szDBName,
 #else
     {
 	// Use SQLDriverConnect to pass DSN parameters (like Address) to the driver.
-	// SQLConnect only passes DSN name/user/password and some drivers need
-	// additional parameters from odbc.ini to establish connections.
-	char connStr[1024];
+	// Include Address from GRIDGAIN_ADDRESS env var if available, since some
+	// unixODBC configurations don't merge DSN attributes into the connection string.
+	char connStr[2048];
 	SQLCHAR outStr[1024];
 	SQLSMALLINT outStrLen;
-	if (szDBUser && szDBUser[0]) {
-	    snprintf(connStr, sizeof(connStr), "DSN=%s;UID=%s;PWD=%s", szDBName, szDBUser, szDBPass ? szDBPass : "");
+	const char* addr = getenv("GRIDGAIN_ADDRESS");
+	if (addr && addr[0]) {
+	    snprintf(connStr, sizeof(connStr), "DSN=%s;Address=%s;UID=%s;PWD=%s",
+		     szDBName, addr,
+		     szDBUser ? szDBUser : "", szDBPass ? szDBPass : "");
+	} else if (szDBUser && szDBUser[0]) {
+	    snprintf(connStr, sizeof(connStr), "DSN=%s;UID=%s;PWD=%s",
+		     szDBName, szDBUser, szDBPass ? szDBPass : "");
 	} else {
 	    snprintf(connStr, sizeof(connStr), "DSN=%s", szDBName);
 	}
