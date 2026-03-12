@@ -530,9 +530,9 @@ void CDataMaintenanceDB::DoDataMaintenanceFrame1(
 	SQLCloseCursor(m_Stmt);
 
 
-	if ((pt = strstr(tax_name, " Tax ")) > 0)
+	if ((pt = strstr(tax_name, " Tax ")) != NULL)
 	    pt[1] = 't';
-	else if ((pt = strstr(tax_name, " tax ")) > 0)
+	else if ((pt = strstr(tax_name, " tax ")) != NULL)
 	    pt[1] = 'T';
 
 

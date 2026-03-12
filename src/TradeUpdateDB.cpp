@@ -107,14 +107,14 @@ void CTradeUpdateDB::DoTradeUpdateFrame1(const TTradeUpdateFrame1Input *pIn,
 	    }
 
 	    char *p_index;
-	    if ((p_index = strstr(old_ex_name, " X ")) != 0)
+	    if ((p_index = strstr(old_ex_name, " X ")) != NULL)
 	    {
 		strncpy(new_ex_name, old_ex_name, p_index - old_ex_name);
 		*(new_ex_name + (p_index - old_ex_name)) = ' ';
 		strncpy(new_ex_name + (p_index - old_ex_name) + 1,
 			p_index + 3, cEXEC_NAME_len+1 - ((p_index - old_ex_name) + 1));
 	    }
-	    else if ((p_index = index(old_ex_name,(int)' ')) != 0)
+	    else if ((p_index = index(old_ex_name,(int)' ')) != NULL)
 	    {
 		strncpy(new_ex_name, old_ex_name, p_index - old_ex_name);
 		strcpy(new_ex_name + (p_index - old_ex_name), " X ");
