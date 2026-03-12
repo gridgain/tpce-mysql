@@ -1192,6 +1192,7 @@ void CTradeLookupDB::DoTradeLookupFrame4(const TTradeLookupFrame4Input *pIn,
     rc = SQLExecute(stmt);
 #else // !USE_PREPARE
     stmt = m_Stmt;
+    {
     ostringstream osTLF4_2;
 #ifdef ORACLE_ODBC
     osTLF4_2 << "SELECT * FROM (SELECT TO_CHAR(h1.hh_h_t_id), TO_CHAR(h1.hh_t_id), h1.hh_before_qty, h1.hh_after_qty FROM holding_history h1, holding_history h2 WHERE h1.hh_h_t_id = h2.hh_h_t_id AND h2.hh_t_id = " <<
@@ -1201,6 +1202,7 @@ void CTradeLookupDB::DoTradeLookupFrame4(const TTradeLookupFrame4Input *pIn,
 	pOut->trade_id << " LIMIT 20";
 #endif
     rc = SQLExecDirect(stmt, (SQLCHAR*)(osTLF4_2.str().c_str()), SQL_NTS);
+    }
 #endif // USE_PREPARE
 
     if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
