@@ -65,7 +65,7 @@ void CSecurityDetailDB::DoSecurityDetailFrame1(
     rc = SQLExecute(stmt);
 #else
     stmt = m_Stmt;
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL READ COMMITTED", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #endif
     if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
         ThrowError(CODBCERR::eExecDirect, SQL_HANDLE_STMT, stmt, __FILE__, __LINE__);
@@ -74,11 +74,11 @@ void CSecurityDetailDB::DoSecurityDetailFrame1(
     BeginTxn();
 
     /* SELECT s_name, co_id, co_name, co_sp_rate, co_ceo,
-              co_desc, DATE_FORMAT(co_open_date,'%Y-%m-%d'), co_st_id, ca.ad_line1, ca.ad_line2,
+              co_desc, CAST(co_open_date AS VARCHAR), co_st_id, ca.ad_line1, ca.ad_line2,
               zca.zc_town, zca.zc_div, ca.ad_zc_code, ca.ad_ctry, s_num_out,
-              DATE_FORMAT(s_start_date,'%Y-%m-%d'), DATE_FORMAT(s_exch_date,'%Y-%m-%d'),
-              s_pe, s_52wk_high, DATE_FORMAT(s_52wk_high_date,'%Y-%m-%d'),
-              s_52wk_low, DATE_FORMAT(s_52wk_low_date,'%Y-%m-%d'), s_dividend, s_yield, zea.zc_div,
+              CAST(s_start_date AS VARCHAR), CAST(s_exch_date AS VARCHAR),
+              s_pe, s_52wk_high, CAST(s_52wk_high_date AS VARCHAR),
+              s_52wk_low, CAST(s_52wk_low_date AS VARCHAR), s_dividend, s_yield, zea.zc_div,
               ea.ad_ctry, ea.ad_line1, ea.ad_line2, zea.zc_town, ea.ad_zc_code,
               ex_close, ex_desc, ex_name, ex_num_symb, ex_open
        FROM   security,
@@ -107,7 +107,7 @@ void CSecurityDetailDB::DoSecurityDetailFrame1(
     stmt = m_Stmt;
     ostringstream osSDF1_1;
 #ifdef MYSQL_ODBC
-    osSDF1_1 << "SELECT s_name, co_id, co_name, co_sp_rate, co_ceo, co_desc, DATE_FORMAT(co_open_date,'%Y-%m-%d'), co_st_id, ca.ad_line1, ca.ad_line2, zca.zc_town, zca.zc_div, ca.ad_zc_code, ca.ad_ctry, s_num_out, DATE_FORMAT(s_start_date,'%Y-%m-%d'), DATE_FORMAT(s_exch_date,'%Y-%m-%d'), s_pe, s_52wk_high, DATE_FORMAT(s_52wk_high_date,'%Y-%m-%d'), s_52wk_low, DATE_FORMAT(s_52wk_low_date,'%Y-%m-%d'), s_dividend, s_yield, zea.zc_div, ea.ad_ctry, ea.ad_line1, ea.ad_line2, zea.zc_town, ea.ad_zc_code, ex_close, ex_desc, ex_name, ex_num_symb, ex_open FROM security, company, address ca, address ea, zip_code zca, zip_code zea, exchange WHERE s_symb = '" <<
+    osSDF1_1 << "SELECT s_name, co_id, co_name, co_sp_rate, co_ceo, co_desc, CAST(co_open_date AS VARCHAR), co_st_id, ca.ad_line1, ca.ad_line2, zca.zc_town, zca.zc_div, ca.ad_zc_code, ca.ad_ctry, s_num_out, CAST(s_start_date AS VARCHAR), CAST(s_exch_date AS VARCHAR), s_pe, s_52wk_high, CAST(s_52wk_high_date AS VARCHAR), s_52wk_low, CAST(s_52wk_low_date AS VARCHAR), s_dividend, s_yield, zea.zc_div, ea.ad_ctry, ea.ad_line1, ea.ad_line2, zea.zc_town, ea.ad_zc_code, ex_close, ex_desc, ex_name, ex_num_symb, ex_open FROM security, company, address ca, address ea, zip_code zca, zip_code zea, exchange WHERE s_symb = '" <<
 #elif PGSQL_ODBC
     osSDF1_1 << "SELECT s_name, co_id, co_name, co_sp_rate, co_ceo, co_desc, TO_CHAR(co_open_date,'YYYY-MM-DD'), co_st_id, ca.ad_line1, ca.ad_line2, zca.zc_town, zca.zc_div, ca.ad_zc_code, ca.ad_ctry, s_num_out, TO_CHAR(s_start_date,'YYYY-MM-DD'), TO_CHAR(s_exch_date,'YYYY-MM-DD'), s_pe, s_52wk_high, TO_CHAR(s_52wk_high_date,'YYYY-MM-DD'), s_52wk_low, TO_CHAR(s_52wk_low_date,'YYYY-MM-DD'), s_dividend, s_yield, zea.zc_div, ea.ad_ctry, ea.ad_line1, ea.ad_line2, zea.zc_town, ea.ad_zc_code, ex_close, ex_desc, ex_name, ex_num_symb, ex_open FROM security, company, address ca, address ea, zip_code zca, zip_code zea, exchange WHERE s_symb = '" <<
 #elif ORACLE_ODBC
@@ -351,7 +351,7 @@ void CSecurityDetailDB::DoSecurityDetailFrame1(
 
 
 
-    /* SELECT   fi_year, fi_qtr, DATE_FORMAT(fi_qtr_start_date,'%Y-%m-%d'), fi_revenue, fi_net_earn,
+    /* SELECT   fi_year, fi_qtr, CAST(fi_qtr_start_date AS VARCHAR), fi_revenue, fi_net_earn,
                 fi_basic_eps, fi_dilut_eps, fi_margin, fi_inventory, fi_assets,
                 fi_liability, fi_out_basic, fi_out_dilut
        FROM     financial
@@ -378,7 +378,7 @@ void CSecurityDetailDB::DoSecurityDetailFrame1(
     stmt = m_Stmt;
     ostringstream osSDF1_3;
 #ifdef MYSQL_ODBC
-    osSDF1_3 << "SELECT fi_year, fi_qtr, DATE_FORMAT(fi_qtr_start_date,'%Y-%m-%d'), fi_revenue, fi_net_earn, fi_basic_eps, fi_dilut_eps, fi_margin, fi_inventory, fi_assets, fi_liability, fi_out_basic, fi_out_dilut FROM financial WHERE fi_co_id = " <<
+    osSDF1_3 << "SELECT fi_year, fi_qtr, CAST(fi_qtr_start_date AS VARCHAR), fi_revenue, fi_net_earn, fi_basic_eps, fi_dilut_eps, fi_margin, fi_inventory, fi_assets, fi_liability, fi_out_basic, fi_out_dilut FROM financial WHERE fi_co_id = " <<
 	co_id << " ORDER BY fi_year ASC, fi_qtr LIMIT " <<
 	max_fin_len;
 #elif PGSQL_ODBC
@@ -488,7 +488,7 @@ void CSecurityDetailDB::DoSecurityDetailFrame1(
     pOut->fin_len = i;
 
 
-    /* SELECT   DATE_FORMAT(dm_date,'%Y-%m-%d'),
+    /* SELECT   CAST(dm_date AS VARCHAR),
                 dm_close,
                 dm_high,
                 dm_low,
@@ -522,7 +522,7 @@ void CSecurityDetailDB::DoSecurityDetailFrame1(
     stmt = m_Stmt;
     ostringstream osSDF1_4;
 #ifdef MYSQL_ODBC
-    osSDF1_4 << "SELECT DATE_FORMAT(dm_date,'%Y-%m-%d'), dm_close, dm_high, dm_low, dm_vol FROM daily_market WHERE dm_s_symb = '" <<
+    osSDF1_4 << "SELECT CAST(dm_date AS VARCHAR), dm_close, dm_high, dm_low, dm_vol FROM daily_market WHERE dm_s_symb = '" <<
 	pIn->symbol << "' AND dm_date >= '" <<
 	start_day << "' ORDER BY dm_date ASC LIMIT " <<
 	pIn->max_rows_to_return;
@@ -648,7 +648,7 @@ void CSecurityDetailDB::DoSecurityDetailFrame1(
     if(pIn->access_lob_flag)
     {
 	/* SELECT ni_item,
-	          DATE_FORMAT(ni_dts, '%Y-%m-%d %H:%i:%s.%f'),
+	          CAST(ni_dts AS VARCHAR),
 	          ni_source,
 	          ni_author
 	   FROM   news_xref,
@@ -675,7 +675,7 @@ void CSecurityDetailDB::DoSecurityDetailFrame1(
 	stmt = m_Stmt;
 	ostringstream osSDF1_6;
 #ifdef MYSQL_ODBC
-	osSDF1_6 << "SELECT ni_item, DATE_FORMAT(ni_dts, '%Y-%m-%d %H:%i:%s.%f'), ni_source, ni_author FROM news_xref, news_item WHERE  ni_id = nx_ni_id AND nx_co_id = " <<
+	osSDF1_6 << "SELECT ni_item, CAST(ni_dts AS VARCHAR), ni_source, ni_author FROM news_xref, news_item WHERE  ni_id = nx_ni_id AND nx_co_id = " <<
 	    co_id << " LIMIT " <<
 	    max_news_len;
 #elif PGSQL_ODBC
@@ -741,7 +741,7 @@ void CSecurityDetailDB::DoSecurityDetailFrame1(
     }
     else
     {
-	/* SELECT DATE_FORMAT(ni_dts, '%Y-%m-%d %H:%i:%s.%f'),
+	/* SELECT CAST(ni_dts AS VARCHAR),
 	          ni_source,
 	          ni_author,
 	          ni_headline,
@@ -770,7 +770,7 @@ void CSecurityDetailDB::DoSecurityDetailFrame1(
 	stmt = m_Stmt;
 	ostringstream osSDF1_7;
 #ifdef MYSQL_ODBC
-	osSDF1_7 << "SELECT DATE_FORMAT(ni_dts, '%Y-%m-%d %H:%i:%s.%f'), ni_source, ni_author, ni_headline, ni_summary FROM news_xref, news_item WHERE ni_id = nx_ni_id AND nx_co_id = " <<
+	osSDF1_7 << "SELECT CAST(ni_dts AS VARCHAR), ni_source, ni_author, ni_headline, ni_summary FROM news_xref, news_item WHERE ni_id = nx_ni_id AND nx_co_id = " <<
 	    co_id << " LIMIT " <<
 	    max_news_len;
 #elif PGSQL_ODBC

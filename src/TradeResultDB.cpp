@@ -38,7 +38,7 @@ void CTradeResultDB::DoTradeResultFrame1(
     rc = SQLExecute(stmt);
 #else
     stmt = m_Stmt;
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL SERIALIZABLE", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #endif
     if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
         ThrowError(CODBCERR::eExecDirect, SQL_HANDLE_STMT, stmt, __FILE__, __LINE__);

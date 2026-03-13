@@ -48,9 +48,9 @@ void CTradeUpdateDB::DoTradeUpdateFrame1(const TTradeUpdateFrame1Input *pIn,
     stmt = m_Stmt;
 #if (defined(ORACLE_ODBC)||defined(PGSQL_ODBC))
     //Oracle and PostgreSQL don't have "REPEATABLE READ" level
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL SERIALIZABLE", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #else
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL REPEATABLE READ", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #endif
 #endif
     if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
@@ -217,7 +217,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame1(const TTradeUpdateFrame1Input *pIn,
         pOut->trade_info[i].is_market = (is_market != 0);
 
 
-	/* SELECT se_amt, DATE_FORMAT(se_cash_due_date, '%Y-%m-%d'), se_cash_type
+	/* SELECT se_amt, CAST(se_cash_due_date AS VARCHAR), se_cash_type
 	   FROM settlement
 	   WHERE se_t_id = %ld */
 
@@ -236,7 +236,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame1(const TTradeUpdateFrame1Input *pIn,
 	stmt = m_Stmt;
 	ostringstream osTUF1_4;
 #ifdef MYSQL_ODBC
-	osTUF1_4 << "SELECT se_amt, DATE_FORMAT(se_cash_due_date, '%Y-%m-%d'), se_cash_type FROM settlement WHERE se_t_id = " <<
+	osTUF1_4 << "SELECT se_amt, CAST(se_cash_due_date AS VARCHAR), se_cash_type FROM settlement WHERE se_t_id = " <<
 #elif PGSQL_ODBC
 	osTUF1_4 << "SELECT se_amt, TO_CHAR(se_cash_due_date, 'YYYY-MM-DD'), se_cash_type FROM settlement WHERE se_t_id = " <<
 #elif ORACLE_ODBC
@@ -276,7 +276,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame1(const TTradeUpdateFrame1Input *pIn,
 
 	if(pOut->trade_info[i].is_cash)
         {
-	    /* SELECT ct_amt, DATE_FORMAT(ct_dts, '%Y-%m-%d %H:%i:%s.%f'), ct_name
+	    /* SELECT ct_amt, CAST(ct_dts AS VARCHAR), ct_name
 	       FROM cash_transaction
 	       WHERE ct_t_id = %ld */
 
@@ -295,7 +295,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame1(const TTradeUpdateFrame1Input *pIn,
 	    stmt = m_Stmt;
 	    ostringstream osTUF1_5;
 #ifdef MYSQL_ODBC
-	    osTUF1_5 << "SELECT ct_amt, DATE_FORMAT(ct_dts, '%Y-%m-%d %H:%i:%s.%f'), ct_name FROM cash_transaction WHERE ct_t_id = " <<
+	    osTUF1_5 << "SELECT ct_amt, CAST(ct_dts AS VARCHAR), ct_name FROM cash_transaction WHERE ct_t_id = " <<
 #elif PGSQL_ODBC
 	    osTUF1_5 << "SELECT ct_amt, TO_CHAR(ct_dts, 'YYYY-MM-DD HH24:MI:SS.US'), ct_name FROM cash_transaction WHERE ct_t_id = " <<
 #elif ORACLE_ODBC
@@ -334,7 +334,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame1(const TTradeUpdateFrame1Input *pIn,
 	}
 
 
-	/* SELECT DATE_FORMAT(th_dts, '%Y-%m-%d %H:%i:%s.%f'), th_st_id
+	/* SELECT CAST(th_dts AS VARCHAR), th_st_id
 	   FROM trade_history
 	   WHERE th_t_id = %ld
 	   ORDER BY th_dts
@@ -355,7 +355,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame1(const TTradeUpdateFrame1Input *pIn,
 	stmt = m_Stmt;
 	ostringstream osTUF1_6;
 #ifdef MYSQL_ODBC
-	osTUF1_6 << "SELECT DATE_FORMAT(th_dts, '%Y-%m-%d %H:%i:%s.%f'), th_st_id FROM trade_history WHERE th_t_id = " <<
+	osTUF1_6 << "SELECT CAST(th_dts AS VARCHAR), th_st_id FROM trade_history WHERE th_t_id = " <<
             pIn->trade_id[i] << " ORDER BY th_dts LIMIT 3";
 #elif PGSQL_ODBC
 	osTUF1_6 << "SELECT TO_CHAR(th_dts, 'YYYY-MM-DD HH24:MI:SS.US'), th_st_id FROM trade_history WHERE th_t_id = " <<
@@ -456,9 +456,9 @@ void CTradeUpdateDB::DoTradeUpdateFrame2(const TTradeUpdateFrame2Input *pIn,
     stmt = m_Stmt;
 #if (defined(ORACLE_ODBC)||defined(PGSQL_ODBC))
     //Oracle and PostgreSQL don't have "REPEATABLE READ" level
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL SERIALIZABLE", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #else
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL REPEATABLE READ", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #endif
 #endif
     if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
@@ -672,7 +672,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame2(const TTradeUpdateFrame2Input *pIn,
 	    pOut->num_updated += row_count;
 	}
 
-	/* SELECT se_amt, DATE_FORMAT(se_cash_due_date, '%Y-%m-%d'), se_cash_type
+	/* SELECT se_amt, CAST(se_cash_due_date AS VARCHAR), se_cash_type
 	   FROM settlement
 	   WHERE se_t_id = %s */
 
@@ -691,7 +691,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame2(const TTradeUpdateFrame2Input *pIn,
 	stmt = m_Stmt;
 	ostringstream osTUF2_4;
 #ifdef MYSQL_ODBC
-	osTUF2_4 << "SELECT se_amt, DATE_FORMAT(se_cash_due_date, '%Y-%m-%d'), se_cash_type FROM settlement WHERE se_t_id = " <<
+	osTUF2_4 << "SELECT se_amt, CAST(se_cash_due_date AS VARCHAR), se_cash_type FROM settlement WHERE se_t_id = " <<
 #elif PGSQL_ODBC
 	osTUF2_4 << "SELECT se_amt, TO_CHAR(se_cash_due_date, 'YYYY-MM-DD'), se_cash_type FROM settlement WHERE se_t_id = " <<
 #elif ORACLE_ODBC
@@ -731,7 +731,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame2(const TTradeUpdateFrame2Input *pIn,
 
 	if(pOut->trade_info[i].is_cash)
 	{
-	    /* SELECT ct_amt, DATE_FORMAT(ct_dts, '%Y-%m-%d %H:%i:%s.%f'), ct_name
+	    /* SELECT ct_amt, CAST(ct_dts AS VARCHAR), ct_name
 	       FROM cash_transaction
 	       WHERE ct_t_id = %s */
 
@@ -750,7 +750,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame2(const TTradeUpdateFrame2Input *pIn,
 	    stmt = m_Stmt;
 	    ostringstream osTUF2_5;
 #ifdef MYSQL_ODBC
-	    osTUF2_5 << "SELECT ct_amt, DATE_FORMAT(ct_dts, '%Y-%m-%d %H:%i:%s.%f'), ct_name FROM cash_transaction WHERE ct_t_id = " <<
+	    osTUF2_5 << "SELECT ct_amt, CAST(ct_dts AS VARCHAR), ct_name FROM cash_transaction WHERE ct_t_id = " <<
 #elif PGSQL_ODBC
 	    osTUF2_5 << "SELECT ct_amt, TO_CHAR(ct_dts, 'YYYY-MM-DD HH24:MI:SS.US'), ct_name FROM cash_transaction WHERE ct_t_id = " <<
 #elif ORACLE_ODBC
@@ -788,7 +788,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame2(const TTradeUpdateFrame2Input *pIn,
 	    pOut->trade_info[i].cash_transaction_dts.fraction *= 1000; //MySQL %f:micro sec.  EGen(ODBC) fraction:nano sec.
 	}
 
-	/* SELECT DATE_FORMAT(th_dts, '%Y-%m-%d %H:%i:%s.%f'), th_st_id
+	/* SELECT CAST(th_dts AS VARCHAR), th_st_id
 	   FROM trade_history
 	   WHERE th_t_id = %s
 	   ORDER BY th_dts
@@ -809,7 +809,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame2(const TTradeUpdateFrame2Input *pIn,
 	stmt = m_Stmt;
 	ostringstream osTUF2_6;
 #ifdef MYSQL_ODBC
-	osTUF2_6 << "SELECT DATE_FORMAT(th_dts, '%Y-%m-%d %H:%i:%s.%f'), th_st_id FROM trade_history WHERE th_t_id = " <<
+	osTUF2_6 << "SELECT CAST(th_dts AS VARCHAR), th_st_id FROM trade_history WHERE th_t_id = " <<
             pOut->trade_info[i].trade_id << " ORDER BY th_dts LIMIT 3";
 #elif PGSQL_ODBC
 	osTUF2_6 << "SELECT TO_CHAR(th_dts, 'YYYY-MM-DD HH24:MI:SS.US'), th_st_id FROM trade_history WHERE th_t_id = " <<
@@ -913,9 +913,9 @@ void CTradeUpdateDB::DoTradeUpdateFrame3(const TTradeUpdateFrame3Input *pIn,
     stmt = m_Stmt;
 #if (defined(ORACLE_ODBC)||defined(PGSQL_ODBC))
     //Oracle and PostgreSQL don't have "REPEATABLE READ" level
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL SERIALIZABLE", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #else
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL REPEATABLE READ", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #endif
 #endif
     if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
@@ -925,7 +925,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame3(const TTradeUpdateFrame3Input *pIn,
     BeginTxn();
 
     /* SELECT t_ca_id, t_exec_name, t_is_cash, t_trade_price, t_qty,
-              s_name, DATE_FORMAT(t_dts, '%Y-%m-%d %H:%i:%s.%f'), t_id, t_tt_id, tt_name
+              s_name, CAST(t_dts AS VARCHAR), t_id, t_tt_id, tt_name
        FROM trade, trade_type, security
        WHERE t_s_symb = '%s'
          AND t_dts >= '%s'
@@ -972,7 +972,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame3(const TTradeUpdateFrame3Input *pIn,
     stmt = m_Stmt;
     ostringstream osTUF3_1;
 #ifdef MYSQL_ODBC
-    osTUF3_1 << "SELECT t_ca_id, t_exec_name, t_is_cash, t_trade_price, t_qty, s_name, DATE_FORMAT(t_dts, '%Y-%m-%d %H:%i:%s.%f'), t_id, t_tt_id, tt_name FROM trade, trade_type FORCE INDEX(PRIMARY), security WHERE t_s_symb = '" <<
+    osTUF3_1 << "SELECT t_ca_id, t_exec_name, t_is_cash, t_trade_price, t_qty, s_name, CAST(t_dts AS VARCHAR), t_id, t_tt_id, tt_name FROM trade, trade_type, security WHERE t_s_symb = '" <<
 	pIn->symbol << "' AND t_dts >= '" <<
 	start_trade_dts << "' AND t_dts <= '" <<
 	end_trade_dts << "' AND tt_id = t_tt_id AND s_symb = t_s_symb ORDER BY t_dts ASC LIMIT " <<
@@ -1080,7 +1080,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame3(const TTradeUpdateFrame3Input *pIn,
 
     for (i = 0; i < pOut->num_found; i++)
     {
-	/* SELECT se_amt, DATE_FORMAT(se_cash_due_date, '%Y-%m-%d'), se_cash_type
+	/* SELECT se_amt, CAST(se_cash_due_date AS VARCHAR), se_cash_type
 	   FROM settlement
 	   WHERE se_t_id = %s" */
 
@@ -1099,7 +1099,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame3(const TTradeUpdateFrame3Input *pIn,
 	stmt = m_Stmt;
 	ostringstream osTUF3_2;
 #ifdef MYSQL_ODBC
-	osTUF3_2 << "SELECT se_amt, DATE_FORMAT(se_cash_due_date, '%Y-%m-%d'), se_cash_type FROM settlement WHERE se_t_id = " <<
+	osTUF3_2 << "SELECT se_amt, CAST(se_cash_due_date AS VARCHAR), se_cash_type FROM settlement WHERE se_t_id = " <<
 #elif PGSQL_ODBC
 	osTUF3_2 << "SELECT se_amt, TO_CHAR(se_cash_due_date, 'YYYY-MM-DD'), se_cash_type FROM settlement WHERE se_t_id = " <<
 #elif ORACLE_ODBC
@@ -1230,7 +1230,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame3(const TTradeUpdateFrame3Input *pIn,
 		pOut->num_updated += row_count;
 	    }
 
-	    /* SELECT ct_amt, DATE_FORMAT(ct_dts, '%Y-%m-%d %H:%i:%s.%f'), ct_name
+	    /* SELECT ct_amt, CAST(ct_dts AS VARCHAR), ct_name
 	       FROM cash_transaction
 	       WHERE ct_t_id = %s */
 
@@ -1249,7 +1249,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame3(const TTradeUpdateFrame3Input *pIn,
 	    stmt = m_Stmt;
 	    ostringstream osTUF3_5;
 #ifdef MYSQL_ODBC
-	    osTUF3_5 << "SELECT ct_amt, DATE_FORMAT(ct_dts, '%Y-%m-%d %H:%i:%s.%f'), ct_name FROM cash_transaction WHERE ct_t_id = " <<
+	    osTUF3_5 << "SELECT ct_amt, CAST(ct_dts AS VARCHAR), ct_name FROM cash_transaction WHERE ct_t_id = " <<
 #elif PGSQL_ODBC
 	    osTUF3_5 << "SELECT ct_amt, TO_CHAR(ct_dts, 'YYYY-MM-DD HH24:MI:SS.US'), ct_name FROM cash_transaction WHERE ct_t_id = " <<
 #elif ORACLE_ODBC
@@ -1287,7 +1287,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame3(const TTradeUpdateFrame3Input *pIn,
 	    pOut->trade_info[i].cash_transaction_dts.fraction *= 1000; //MySQL %f:micro sec.  EGen(ODBC) fraction:nano sec.
 	}
 
-	/* SELECT DATE_FORMAT(th_dts, '%Y-%m-%d %H:%i:%s.%f'), th_st_id
+	/* SELECT CAST(th_dts AS VARCHAR), th_st_id
 	   FROM trade_history
 	   WHERE th_t_id = %s
 	   ORDER BY th_dts ASC
@@ -1308,7 +1308,7 @@ void CTradeUpdateDB::DoTradeUpdateFrame3(const TTradeUpdateFrame3Input *pIn,
 	stmt = m_Stmt;
 	ostringstream osTUF3_6;
 #ifdef MYSQL_ODBC
-	osTUF3_6 << "SELECT DATE_FORMAT(th_dts, '%Y-%m-%d %H:%i:%s.%f'), th_st_id FROM trade_history WHERE th_t_id = " <<
+	osTUF3_6 << "SELECT CAST(th_dts AS VARCHAR), th_st_id FROM trade_history WHERE th_t_id = " <<
             pOut->trade_info[i].trade_id << " ORDER BY th_dts ASC LIMIT 3";
 #elif PGSQL_ODBC
 	osTUF3_6 << "SELECT TO_CHAR(th_dts, 'YYYY-MM-DD HH24:MI:SS.US'), th_st_id FROM trade_history WHERE th_t_id = " <<

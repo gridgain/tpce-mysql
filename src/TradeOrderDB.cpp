@@ -40,9 +40,9 @@ void CTradeOrderDB::DoTradeOrderFrame1(const TTradeOrderFrame1Input *pIn,
     stmt = m_Stmt;
 #if (defined(ORACLE_ODBC)||defined(PGSQL_ODBC))
     //Oracle and PostgreSQL don't have "REPEATABLE READ" level
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL SERIALIZABLE", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #else
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL REPEATABLE READ", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #endif //ORACLE_ODBC PGSQL_ODBC
 #endif
     if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
@@ -1028,9 +1028,9 @@ void CTradeOrderDB::DoTradeOrderFrame4(const TTradeOrderFrame4Input *pIn,
     //***************************************
 
 #ifdef MYSQL_ODBC
-    /* UPDATE seq_trade_id SET id=LAST_INSERT_ID(id+1) */
+    /* Atomically increment seq_trade_id and get new value */
     stmt = m_Stmt;
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"UPDATE seq_trade_id SET id=LAST_INSERT_ID(id+1)", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"UPDATE seq_trade_id SET id = id + 1 WHERE pk = 1", SQL_NTS);
     if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
 	ThrowError(CODBCERR::eExecDirect, SQL_HANDLE_STMT, stmt, __FILE__, __LINE__);
     SQLCloseCursor(stmt);
@@ -1038,8 +1038,8 @@ void CTradeOrderDB::DoTradeOrderFrame4(const TTradeOrderFrame4Input *pIn,
 
     stmt = m_Stmt;
 #ifdef MYSQL_ODBC
-    /* SELECT LAST_INSERT_ID() */
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT LAST_INSERT_ID()", SQL_NTS);
+    /* Get the new trade ID */
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT id FROM seq_trade_id WHERE pk = 1", SQL_NTS);
 #elif PGSQL_ODBC
     rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT NEXTVAL('seq_trade_id')", SQL_NTS);
 #elif ORACLE_ODBC

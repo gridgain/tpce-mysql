@@ -48,7 +48,7 @@ void CCustomerPositionDB::DoCustomerPositionFrame1(
     rc = SQLExecute(stmt);
 #else
     stmt = m_Stmt;
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL READ COMMITTED", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #endif
     if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
         ThrowError(CODBCERR::eExecDirect, SQL_HANDLE_STMT, stmt, __FILE__, __LINE__);
@@ -106,7 +106,7 @@ void CCustomerPositionDB::DoCustomerPositionFrame1(
 
 
     /* SELECT c_st_id, c_l_name, c_f_name, c_m_name, c_gndr,
-              c_tier, DATE_FORMAT(c_dob,'%Y-%m-%d'), c_ad_id, c_ctry_1, c_area_1,
+              c_tier, CAST(c_dob AS VARCHAR), c_ad_id, c_ctry_1, c_area_1,
               c_local_1, c_ext_1, c_ctry_2, c_area_2, c_local_2,
               c_ext_2, c_ctry_3, c_area_3, c_local_3, c_ext_3,
               c_email_1, c_email_2
@@ -128,7 +128,7 @@ void CCustomerPositionDB::DoCustomerPositionFrame1(
     stmt = m_Stmt;
     ostringstream osCPF1_2;
 #ifdef MYSQL_ODBC
-    osCPF1_2 << "SELECT c_st_id, c_l_name, c_f_name, c_m_name, c_gndr, c_tier, DATE_FORMAT(c_dob,'%Y-%m-%d'), c_ad_id, c_ctry_1, c_area_1, c_local_1, c_ext_1, c_ctry_2, c_area_2, c_local_2, c_ext_2, c_ctry_3, c_area_3, c_local_3, c_ext_3, c_email_1, c_email_2 FROM customer WHERE c_id = " << cust_id;
+    osCPF1_2 << "SELECT c_st_id, c_l_name, c_f_name, c_m_name, c_gndr, c_tier, CAST(c_dob AS VARCHAR), c_ad_id, c_ctry_1, c_area_1, c_local_1, c_ext_1, c_ctry_2, c_area_2, c_local_2, c_ext_2, c_ctry_3, c_area_3, c_local_3, c_ext_3, c_email_1, c_email_2 FROM customer WHERE c_id = " << cust_id;
 #elif PGSQL_ODBC
     osCPF1_2 << "SELECT c_st_id, c_l_name, c_f_name, c_m_name, c_gndr, c_tier, TO_CHAR(c_dob,'YYYY-MM-DD'), c_ad_id, c_ctry_1, c_area_1, c_local_1, c_ext_1, c_ctry_2, c_area_2, c_local_2, c_ext_2, c_ctry_3, c_area_3, c_local_3, c_ext_3, c_email_1, c_email_2 FROM customer WHERE c_id = " << cust_id;
 #elif ORACLE_ODBC
@@ -347,7 +347,7 @@ void CCustomerPositionDB::DoCustomerPositionFrame2(
                 t_s_symb,
                 t_qty,
                 st_name,
-                DATE_FORMAT(th_dts,'%Y-%m-%d %H:%i:%s.%f')
+                CAST(th_dts AS VARCHAR)
        FROM     (SELECT   t_id AS id
                  FROM     trade
                  WHERE    t_ca_id = %ld
@@ -380,8 +380,8 @@ void CCustomerPositionDB::DoCustomerPositionFrame2(
     stmt = m_Stmt;
     ostringstream osCPF2_1;
 #ifdef MYSQL_ODBC
-    osCPF2_1 << "SELECT t_id, t_s_symb, t_qty, st_name, DATE_FORMAT(th_dts,'%Y-%m-%d %H:%i:%s.%f') FROM (SELECT t_id AS id FROM trade WHERE t_ca_id = " <<
-	pIn->acct_id << " ORDER BY t_dts DESC LIMIT 10) AS t, trade, trade_history, status_type FORCE INDEX(PRIMARY) WHERE t_id = id AND th_t_id = t_id AND st_id = th_st_id ORDER BY th_dts DESC LIMIT " <<
+    osCPF2_1 << "SELECT t_id, t_s_symb, t_qty, st_name, CAST(th_dts AS VARCHAR) FROM (SELECT t_id AS id FROM trade WHERE t_ca_id = " <<
+	pIn->acct_id << " ORDER BY t_dts DESC LIMIT 10) AS t, trade, trade_history, status_type WHERE t_id = id AND th_t_id = t_id AND st_id = th_st_id ORDER BY th_dts DESC LIMIT " <<
 	max_hist_len;
 #elif PGSQL_ODBC
     osCPF2_1 << "SELECT t_id, t_s_symb, t_qty, st_name, TO_CHAR(th_dts,'YYYY-MM-DD HH24:MI:SS.US') FROM (SELECT t_id AS id FROM trade WHERE t_ca_id = " <<

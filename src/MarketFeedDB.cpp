@@ -65,9 +65,9 @@ void CMarketFeedDB::DoMarketFeedFrame1(
 		stmt = m_Stmt;
 #if (defined(ORACLE_ODBC)||defined(PGSQL_ODBC))
 		//Oracle and PostgreSQL don't have "REPEATABLE READ" level
-		rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL SERIALIZABLE", SQL_NTS);
+		rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #else
-		rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL REPEATABLE READ", SQL_NTS);
+		rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #endif //ORACLE_ODBC PGSQL_ODBC
 #endif
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)

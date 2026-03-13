@@ -53,7 +53,7 @@ void CDataMaintenanceDB::DoDataMaintenanceFrame1(
     rc = SQLExecute(stmt);
 #else
     stmt = m_Stmt;
-    rc = SQLExecDirect(stmt, (SQLCHAR*)"SET TRANSACTION ISOLATION LEVEL READ COMMITTED", SQL_NTS);
+    rc = SQLExecDirect(stmt, (SQLCHAR*)"SELECT 1 /* GridGain: ISO level N/A */", SQL_NTS);
 #endif
     if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO)
 	ThrowError(CODBCERR::eExecDirect, SQL_HANDLE_STMT, stmt, __FILE__, __LINE__);
@@ -396,8 +396,8 @@ void CDataMaintenanceDB::DoDataMaintenanceFrame1(
 		FROM 1 FOR (CHAR_LENGTH(ex_desc) -
 		CHAR_LENGTH(NOW()))) || NOW() */
 #ifdef MYSQL_ODBC
-	    osDMF1_13 << "UPDATE exchange SET ex_desc = INSERT(ex_desc, LENGTH(ex_desc) - " <<
-		(now_dts_len - 1) << ", " << now_dts_len << ",'" << now_dts << "')";
+	    osDMF1_13 << "UPDATE exchange SET ex_desc = SUBSTRING(ex_desc FROM 1 FOR (CHAR_LENGTH(ex_desc) - " <<
+		now_dts_len << ")) || '" << now_dts << "'";
 #elif PGSQL_ODBC
 	    osDMF1_13 << "UPDATE exchange SET ex_desc = SUBSTRING(ex_desc FROM 1 FOR (CHAR_LENGTH(ex_desc) - " <<
 		now_dts_len << ")) || '" << now_dts << "'";
